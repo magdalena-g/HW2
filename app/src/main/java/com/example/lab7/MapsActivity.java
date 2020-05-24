@@ -1,16 +1,16 @@
 package com.example.lab7;
 
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -26,8 +26,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
@@ -45,7 +43,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest mLocationRequest;
     private LocationCallback locationCallback;
+
     Marker gpsMarker = null;
+
+    private Button button2;
+
 
 
     @Override
@@ -58,8 +60,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         markerList = new ArrayList<>();
+
+        button2 = findViewById(R.id.button2);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMap.clear();
+            }
+        });
+        
     }
 
+
+
+    private void startSensor() {
+
+    }
 
     /**
      * Manipulates the map once available.
@@ -115,10 +131,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         lastLocation.addOnSuccessListener(this, new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if(location != null && mMap != null){
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-                            .title(getString(R.string.last_know_loc_msg)));
+                if(location != null && mMap != null) {
+
                 }
             }
         });
@@ -131,8 +145,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
         CameraPosition cameraPos = mMap.getCameraPosition();
-        if(cameraPos.zoom<14f)
-            mMap.moveCamera(CameraUpdateFactory.zoomTo(14f));
         return false;
     }
 
@@ -148,13 +160,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(locationResult != null){
                     if(gpsMarker != null)
                         gpsMarker.remove();
-
-                    Location location = locationResult.getLastLocation();
-                    gpsMarker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(location.getLatitude(),location.getLongitude()))
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
-                            .alpha(0.8f)
-                            .title("Current Location"));
                 }
             }
         };
@@ -162,28 +167,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-        float distance = 0f;
 
-        if(markerList.size()>0){
-            Marker lastMarker = markerList.get(markerList.size()-1);
-            float [] tmpDis = new float[3];
-
-            Location.distanceBetween(lastMarker.getPosition().latitude,lastMarker.getPosition().longitude,
-                    latLng.latitude,latLng.longitude,tmpDis);
-            distance = tmpDis[0];
-
-            PolylineOptions rectOptions = new PolylineOptions()
-                    .add(lastMarker.getPosition())
-                    .add(latLng)
-                    .width(10)
-                    .color(Color.BLUE);
-            mMap.addPolyline(rectOptions);
-        }
-        Marker marker = mMap.addMarker(new MarkerOptions()
+         Marker marker = mMap.addMarker(new MarkerOptions()
         .position(new LatLng(latLng.latitude,latLng.longitude))
+                 .position(new LatLng(latLng.latitude, latLng.longitude))
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
                 .alpha(0.8f)
-                .title(String.format("Position:(%.2f, %.2f) Distance:%.2f", latLng.latitude,latLng.longitude,distance)));
+                .title(String.format("Position:(%.2f, %.2f)", latLng.latitude,latLng.longitude)));
         markerList.add(marker);
     }
+
+
+    
+
 }

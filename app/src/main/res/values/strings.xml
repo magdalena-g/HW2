@@ -2,4 +2,6 @@
     <string name="app_name">lab7</string>
     <string name="title_activity_maps">Map</string>
     <string name="last_know_loc_msg">last_know_loc_msg </string>
+    <string name="button">Clear \nmemory</string>
+    <string name="textview">Acceleration:</string>
 </resources>
