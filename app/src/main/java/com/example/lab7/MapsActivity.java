@@ -3,11 +3,15 @@ package com.example.lab7;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -28,6 +32,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,17 +42,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnMapLongClickListener {
 
-    List<Marker> markerList;
+    List<MarkerActivity> markerList;
     private static final int MY_PERMISSION_REQUEST_ACCESS_FINE_LOCATION = 101;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest mLocationRequest;
     private LocationCallback locationCallback;
+    private SensorManager sensorManager;
+    private Sensor mSensor;
 
     Marker gpsMarker = null;
 
     private Button button2;
-
+    private FloatingActionButton floatingActionButton;
+    private FloatingActionButton floatingActionButton2;
+    private TextView textView;
 
 
     @Override
@@ -68,7 +77,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.clear();
             }
         });
-        
+
+        floatingActionButton = findViewById(R.id.floatingActionButton);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        floatingActionButton2 = findViewById(R.id.floatingActionButton2);
+        floatingActionButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                floatingActionButton.animate().alpha(0.0f).setDuration(1000);
+                floatingActionButton2.animate().alpha(0.0f).setDuration(1000);
+                textView.animate().alpha(0.0f).setDuration(1000);
+            }
+        });
+
+        textView = findViewById(R.id.textView);
+
+
     }
 
 
@@ -117,7 +146,65 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    public void onSensorChanged(SensorEvent event){
+        textView.setText("Acceleration\n x:"+event.values[0]+" y: "+event.values[1]);
+    }
+/*
+    private void saveToJson(){
+        Gson gson = new Gson();
+        String listJson = gson.toJson(markerList);
+        FileOutputStream outputStream;
+        try{
+            outputStream = openFileOutput("tasks.json");
+            FileWriter writer = new FileWriter(outputStream.getFD());
+            writer.write(listJson);
+            writer.close();
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
+    public void restoreFromJson(){
+        FileInputStream inputStream;
+        int DEFAULT_BUFFER_SIZE = 10000;
+        Gson gson = new Gson();
+        String readJson;
+
+        try{
+            inputStream = openFileInput("tasks.json");
+            FileReader reader = new FileReader(inputStream.getFD());
+            char[] buf = new char[DEFAULT_BUFFER_SIZE];
+            int n;
+            StringBuilder builder = new StringBuilder();
+            while ((n=reader.read(buf))>=0){
+                String tmp = String.valueOf(buf);
+                String substring = (n<DEFAULT_BUFFER_SIZE) ? tmp.substring(0, n): tmp;
+                builder.append(substring);
+            }
+            reader.close();
+            reader = builder.toString();
+            Type collectionType = new TypeToken<List<MarkerActivity>>(){
+
+            }.getType();
+            List<MarkerActivity> o = gson.fromJson(readJson, collectionType);
+
+            if(o != null){
+                markerList.add();
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng())
+                        .alpha(0.8f)
+                        .title(String.format("Position: (%.2f, %.2f)",mLat, mLon)));
+            }
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+*/
     @Override
     public void onMapLoaded() {
         Log.i(MapsActivity.class.getSimpleName(), "MapLoaded");
@@ -145,6 +232,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
         CameraPosition cameraPos = mMap.getCameraPosition();
+        floatingActionButton.animate().translationY(0f).alpha(1f).setDuration(1000);
+        floatingActionButton2.animate().translationY(0f).alpha(1f).setDuration(1000);
+        textView.animate().translationY(0f).alpha(1f).setDuration(1000);
         return false;
     }
 
@@ -165,6 +255,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
     }
 
+
+
     @Override
     public void onMapLongClick(LatLng latLng) {
 
@@ -174,10 +266,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
                 .alpha(0.8f)
                 .title(String.format("Position:(%.2f, %.2f)", latLng.latitude,latLng.longitude)));
-        markerList.add(marker);
+        markerList.add(new MarkerActivity());
     }
 
 
-    
+
 
 }
